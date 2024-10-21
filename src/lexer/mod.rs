@@ -1,4 +1,4 @@
-use crate::game_comp::*;
+use raylib::prelude::*;
 use std::fmt;
 
 /// Tokens recognized by the parser
@@ -21,17 +21,7 @@ impl fmt::Debug for Token {
 /// A box representing a token
 pub struct Block {
     /// The transform component of the block
-    pub transform: Transform2D,
+    pub transform: Vector2,
     /// The token this block represents
     pub token: Token,
-}
-
-impl Positioned for Block {
-    fn transform(&self) -> &Transform2D {
-        &self.transform
-    }
-
-    fn transform_mut(&mut self) -> &mut Transform2D {
-        &mut self.transform
-    }
 }
