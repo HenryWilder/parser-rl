@@ -1,16 +1,16 @@
-//! A parser in Raylib
-
-#![warn(missing_docs)]
-
-/// The gamer character
-pub mod gamer;
-/// Breaks strings into tokens
-pub mod lexer;
-/// Clumps tokens into syntax
-pub mod parser;
-
 use raylib::prelude::*;
-use gamer::Gamer;
+
+pub mod plugin;
+pub mod device;
+pub mod cable;
+pub mod rack;
+pub mod palette;
+
+use device::*;
+use plugin::*;
+use cable::*;
+use rack::*;
+use palette::*;
 
 fn main() {
     let window_width = 1280;
@@ -22,36 +22,50 @@ fn main() {
 
     rl.set_target_fps(60);
 
-    let mut gamer = Gamer::new(Vector2 { x: 100.0, y: 100.0 });
-    let cam = Camera2D {
-        offset: Vector2::zero(),
-        target: Vector2::zero(),
-        rotation: 0.0,
-        zoom: 0.35,
-    };
+    let rack = Rack::new();
+    let palette = Palette::new();
+    let mut divider_x = 200.0;
+    let mut is_dragging_divider = false;
+    let divider_h_extent = 5;
 
     while !rl.window_should_close() {
         // Update
 
         let dt = rl.get_frame_time();
+        let mouse_pos = rl.get_mouse_position();
 
-        let movement = Vector2::new(
-            (rl.is_key_down(KeyboardKey::KEY_D) as i32 - rl.is_key_down(KeyboardKey::KEY_A) as i32) as f32 * gamer.move_speed * dt,
-            (rl.is_key_down(KeyboardKey::KEY_S) as i32 - rl.is_key_down(KeyboardKey::KEY_W) as i32) as f32 * gamer.move_speed * dt,
-        );
-        gamer.position += movement;
+        let is_hovering_divider = (mouse_pos.x - divider_x).abs() as i32 <= divider_h_extent;
+
+        if rl.is_mouse_button_pressed(MouseButton::MOUSE_BUTTON_LEFT) {
+            if is_hovering_divider {
+                is_dragging_divider = true;
+            }
+        }
+        if rl.is_mouse_button_released(MouseButton::MOUSE_BUTTON_LEFT) {
+            is_dragging_divider = false;
+        }
+
+        if is_dragging_divider {
+            divider_x = mouse_pos.x;
+        }
+
+        if is_hovering_divider || is_dragging_divider {
+            rl.set_mouse_cursor(MouseCursor::MOUSE_CURSOR_RESIZE_EW);
+        } else {
+            rl.set_mouse_cursor(MouseCursor::MOUSE_CURSOR_DEFAULT);
+        }
 
         // Drawing
         {
             let mut d = rl.begin_drawing(&thread);
             d.clear_background(Color::BLACK);
 
-            // Camera
-            {
-                let mut d = d.begin_mode2D(cam);
-        
-                d.draw_circle_v(gamer.position, 50.0, Color::BLUE);
-            }
+            let divider_x = divider_x as i32;
+            
+            rack.draw(&mut d, divider_x, 0, window_width - divider_x, window_height);
+            palette.draw(&mut d, 0, 0, divider_x, window_height);
+
+            d.draw_rectangle(divider_x - 1, 0, 2, window_height, Color::GRAY);
         }
     }
 }
