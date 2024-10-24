@@ -63,24 +63,24 @@ impl Plugin {
         Self { kind, direction, offset }
     }
 
-    pub fn exec_in(x: f32, y: f32) -> Self {
-        Self::new(PluginKind::Execution, PluginDirection::In, Vector2::new(x, y))
+    pub fn exec_in(offset: Vector2) -> Self {
+        Self::new(PluginKind::Execution, PluginDirection::In, offset)
     }
-    pub fn exec_out(x: f32, y: f32) -> Self {
-        Self::new(PluginKind::Execution, PluginDirection::Out, Vector2::new(x, y))
+    pub fn exec_out(offset: Vector2) -> Self {
+        Self::new(PluginKind::Execution, PluginDirection::Out, offset)
     }
-    pub fn exec_inout(x: f32, y: f32) -> Self {
-        Self::new(PluginKind::Execution, PluginDirection::InOut, Vector2::new(x, y))
+    pub fn exec_inout(offset: Vector2) -> Self {
+        Self::new(PluginKind::Execution, PluginDirection::InOut, offset)
     }
 
-    pub fn value_in(x: f32, y: f32) -> Self {
-        Self::new(PluginKind::Value, PluginDirection::In, Vector2::new(x, y))
+    pub fn value_in(offset: Vector2) -> Self {
+        Self::new(PluginKind::Value, PluginDirection::In, offset)
     }
-    pub fn value_out(x: f32, y: f32) -> Self {
-        Self::new(PluginKind::Value, PluginDirection::Out, Vector2::new(x, y))
+    pub fn value_out(offset: Vector2) -> Self {
+        Self::new(PluginKind::Value, PluginDirection::Out, offset)
     }
-    pub fn value_inout(x: f32, y: f32) -> Self {
-        Self::new(PluginKind::Value, PluginDirection::InOut, Vector2::new(x, y))
+    pub fn value_inout(offset: Vector2) -> Self {
+        Self::new(PluginKind::Value, PluginDirection::InOut, offset)
     }
 
     pub fn is_input(&self) -> bool {

@@ -18,11 +18,11 @@ pub struct Cable<'i, 'o> {
     output: Connection<'o>,
 }
 
-// impl<'i, 'o> Cable<'i, 'o> {
-//     pub fn new((in_device, in_plugin): (&'i Device, &'i Plugin), (out_device, out_plugin): (&'i Device, &'i Plugin)) -> Self {
-//         Self {
-//             input:  Connection::new( in_device,  in_plugin),
-//             output: Connection::new(out_device, out_plugin),
-//         }
-//     }
-// }
+impl<'i, 'o> Cable<'i, 'o> {
+    pub fn new((in_device, in_plugin): (&'i Device, &'i Plugin), (out_device, out_plugin): (&'o Device, &'o Plugin)) -> Self {
+        Self {
+            input:  Connection::new( in_device,  in_plugin),
+            output: Connection::new(out_device, out_plugin),
+        }
+    }
+}

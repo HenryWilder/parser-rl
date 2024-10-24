@@ -5,14 +5,14 @@ pub mod device;
 pub mod cable;
 pub mod rack;
 pub mod palette;
-pub mod pane;
+pub mod viewport;
 
 use device::*;
 use plugin::*;
 use cable::*;
 use rack::*;
 use palette::*;
-use pane::*;
+use viewport::*;
 
 // there is no reason this needs a raylib handle
 pub fn measure_text(text: &str, font_size: i32) -> i32 {
@@ -32,12 +32,14 @@ fn main() {
     rl.set_target_fps(60);
 
     // let mut palette = Palette::new(Pane::new(Rectangle::new(0.0, 0.0, 400.0, 1000.0)));
-    let mut rack = Rack::new(Pane::new(Rectangle::new(0.0, 0.0, window_width, window_height)));
+    let mut rack = Rack::new(Viewport::new(Rectangle::new(0.0, 0.0, window_width, window_height)));
 
-    rack.insert_device(0, DeviceKind::Label(String::from("Test")));
-    rack.insert_device(1, DeviceKind::Immediate(Value::I32(-363)));
-    rack.insert_device(2, DeviceKind::Immediate(Value::U32(654)));
-    rack.insert_device(3, DeviceKind::Immediate(Value::F32(5.63)));
+    let device_0 = rack.insert_device(0, DeviceKind::Label(String::from("Test")));
+    let device_1 = rack.insert_device(1, DeviceKind::Immediate(Value::I32(-363)));
+    let device_2 = rack.insert_device(2, DeviceKind::Immediate(Value::U32(654)));
+    let device_3 = rack.insert_device(3, DeviceKind::Immediate(Value::F32(5.63)));
+    let device_4 = rack.insert_device(4, DeviceKind::Math(Operation::Add));
+    // Cable::new();
 
     while !rl.window_should_close() {
         // Update

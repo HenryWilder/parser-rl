@@ -1,9 +1,9 @@
 use raylib::prelude::*;
-use crate::{Device, Pane};
+use crate::{Device, Viewport};
 
 #[derive(Debug)]
 pub struct Palette {
-    pub pane: Pane,
+    pub pane: Viewport,
     /// `list` rectangles are relative to `rec`
     pub list: Vec<Device>,
 }
@@ -16,7 +16,7 @@ impl Palette {
 
     ];
 
-    pub fn new(pane: Pane) -> Self {
+    pub fn new(pane: Viewport) -> Self {
         Self {
             pane,
             list: Self::ALL_DEVICES.to_vec(),
