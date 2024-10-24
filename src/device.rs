@@ -64,17 +64,13 @@ pub struct Device {
 }
 
 enum AlignX {
-    RightFromLeft(usize),
-    LeftFromRight(usize),
-    LeftFromCenter(usize),
-    RightFromCenter(usize),
+    Right,
+    Left,
     HCenter,
 }
 enum AlignY {
-    DownFromTop(usize),
-    UpFromBottom(usize),
-    UpFromCenter(usize),
-    DownFromCenter(usize),
+    Down,
+    Up,
     VCenter,
 }
 
@@ -86,55 +82,42 @@ impl Device {
     pub const WIDTH: f32 = 200.0;
     pub const GRIP_WIDTH: f32 = 1.0;
 
-    /// The height of the device if it has `n` plugins vertically
-    fn height_with_plugins(n: usize) -> f32 {
-        let num_plugins: f32 = n as f32;
-        let num_spaces: f32 = n as f32 - 1.0;
-        2.0 * Self::PLUGIN_SHARED_RADIUS * num_plugins + Self::PLUGIN_GAP * (num_spaces + 2.0)
-    }
-
-    /// The center x or y coordinate of the plugin `n`-plugins along the axis
-    fn plugin_coord(n: usize) -> f32 {
-        Self::PLUGIN_GAP + (Self::PLUGIN_SHARED_RADIUS * 2.0 + Self::PLUGIN_GAP) * n as f32 + Self::PLUGIN_SHARED_RADIUS
-    }
-
-    fn plugin_position(height: f32, x: AlignX, y: AlignY) -> Vector2 {
-        Vector2 {
-            x: match x {
-                AlignX::RightFromLeft  (n) =>                     Self::plugin_coord(n),
-                AlignX::LeftFromRight  (n) => Self::WIDTH       - Self::plugin_coord(n),
-                AlignX::LeftFromCenter (n) => Self::WIDTH * 0.5 - Self::plugin_coord(n),
-                AlignX::RightFromCenter(n) => Self::WIDTH * 0.5 + Self::plugin_coord(n),
-                AlignX::HCenter            => Self::WIDTH * 0.5,
-            },
-
-            y: match y {
-                AlignY::DownFromTop   (n)  =>                     Self::plugin_coord(n),
-                AlignY::UpFromBottom  (n)  => height            - Self::plugin_coord(n),
-                AlignY::UpFromCenter  (n)  => height      * 0.5 - Self::plugin_coord(n),
-                AlignY::DownFromCenter(n)  => height      * 0.5 + Self::plugin_coord(n),
-                AlignY::VCenter            => height      * 0.5,
-            },
-        }
-    }
-
     pub fn new(position: Vector2, kind: DeviceKind) -> Self {
         use {AlignX::*, AlignY::*};
 
-        let height = Self::height_with_plugins(match &kind {
-            | DeviceKind::Label(_)
-            | DeviceKind::Jump { .. }
-            | DeviceKind::Math(_)
-            | DeviceKind::Call
-                => 2,
+        let height = {
+            let n: usize = match &kind {
+                | DeviceKind::Label(_)
+                | DeviceKind::Jump { .. }
+                | DeviceKind::Math(_)
+                | DeviceKind::Call
+                    => 2,
 
-            | DeviceKind::Immediate(_)
-            | DeviceKind::Ret
-                => 1,
-        });
+                | DeviceKind::Immediate(_)
+                | DeviceKind::Ret
+                    => 1,
+            };
+            Self::PLUGIN_GAP + (2.0 * Self::PLUGIN_SHARED_RADIUS + Self::PLUGIN_GAP) * n as f32
+        };
 
-        let pos = |x: AlignX, y: AlignY| -> Vector2 {
-            Self::plugin_position(height, x, y)
+        let pos = |x: AlignX, x_units: i32, y: AlignY, y_units: i32| -> Vector2 {
+            let height = height;
+            let width  = Self::WIDTH;
+            let [x_coord, y_coord] = [x_units, y_units].map(|n|
+                Self::PLUGIN_GAP + (2.0 * Self::PLUGIN_SHARED_RADIUS + Self::PLUGIN_GAP) * n as f32 + Self::PLUGIN_SHARED_RADIUS
+            );
+            Vector2 {
+                x: match x {
+                    AlignX::Right   =>                x_coord,
+                    AlignX::Left    => width        - x_coord,
+                    AlignX::HCenter => width  * 0.5 + x_coord - Self::PLUGIN_GAP - Self::PLUGIN_SHARED_RADIUS,
+                },
+                y: match y {
+                    AlignY::Down    =>                y_coord,
+                    AlignY::Up      => height       - y_coord,
+                    AlignY::VCenter => height * 0.5 + y_coord - Self::PLUGIN_GAP - Self::PLUGIN_SHARED_RADIUS,
+                },
+            }
         };
 
         let plugins = match &kind {
@@ -143,8 +126,8 @@ impl Device {
             // '-O----------'
             DeviceKind::Label(_)
                 => Vec::from([
-                        Plugin::exec_inout(pos(RightFromLeft(0), DownFromTop (0))),
-                        Plugin::exec_out  (pos(RightFromLeft(0), UpFromBottom(0))),
+                        Plugin::exec_inout(pos(Right, 0, Down, 0)),
+                        Plugin::exec_out  (pos(Right, 0, Up,   0)),
                     ]),
 
             // .-O----------.
@@ -168,11 +151,11 @@ impl Device {
             // '-O-*--------'
             DeviceKind::Math(_)
                 => Vec::from([
-                        Plugin::exec_in  (pos(RightFromLeft(0), DownFromTop (0))),
-                        Plugin::exec_out (pos(RightFromLeft(0), UpFromBottom(0))),
-                        Plugin::value_in (pos(RightFromLeft(1), DownFromTop (0))),
-                        Plugin::value_in (pos(RightFromLeft(2), DownFromTop (0))),
-                        Plugin::value_out(pos(RightFromLeft(1), UpFromBottom(0))),
+                        Plugin::exec_in  (pos(Right, 0, Down, 0)),
+                        Plugin::exec_out (pos(Right, 0, Up,   0)),
+                        Plugin::value_in (pos(Right, 1, Down, 0)),
+                        Plugin::value_in (pos(Right, 2, Down, 0)),
+                        Plugin::value_out(pos(Right, 1, Up,   0)),
                     ]),
 
             // .-----------.
@@ -180,7 +163,7 @@ impl Device {
             // '-----------'
             DeviceKind::Immediate(_)
                 => Vec::from([
-                        Plugin::value_out(pos(LeftFromRight(0), VCenter)),
+                        Plugin::value_out(pos(Left, 0, VCenter, 0)),
                     ]),
 
             // .-O---------.
