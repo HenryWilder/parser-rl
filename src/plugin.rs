@@ -31,7 +31,14 @@ impl PluginKind {
     pub fn radius(&self) -> f32 {
         match self {
             PluginKind::Execution => 8.0,
-            PluginKind::Value     => 6.0,
+            PluginKind::Value     => 5.0,
+        }
+    }
+
+    pub fn thickness(&self) -> f32 {
+        match self {
+            PluginKind::Execution => 3.0,
+            PluginKind::Value     => 1.5,
         }
     }
 
@@ -48,31 +55,32 @@ impl PluginKind {
 pub struct Plugin {
     kind: PluginKind,
     direction: PluginDirection,
+    pub offset: Vector2,
 }
 
 impl Plugin {
-    pub fn new(kind: PluginKind, direction: PluginDirection) -> Self {
-        Self { kind, direction }
+    pub fn new(kind: PluginKind, direction: PluginDirection, offset: Vector2) -> Self {
+        Self { kind, direction, offset }
     }
 
-    pub fn exec_in() -> Self {
-        Self::new(PluginKind::Execution, PluginDirection::In)
+    pub fn exec_in(x: f32, y: f32) -> Self {
+        Self::new(PluginKind::Execution, PluginDirection::In, Vector2::new(x, y))
     }
-    pub fn exec_out() -> Self {
-        Self::new(PluginKind::Execution, PluginDirection::Out)
+    pub fn exec_out(x: f32, y: f32) -> Self {
+        Self::new(PluginKind::Execution, PluginDirection::Out, Vector2::new(x, y))
     }
-    pub fn exec_inout() -> Self {
-        Self::new(PluginKind::Execution, PluginDirection::InOut)
+    pub fn exec_inout(x: f32, y: f32) -> Self {
+        Self::new(PluginKind::Execution, PluginDirection::InOut, Vector2::new(x, y))
     }
 
-    pub fn value_in() -> Self {
-        Self::new(PluginKind::Value, PluginDirection::In)
+    pub fn value_in(x: f32, y: f32) -> Self {
+        Self::new(PluginKind::Value, PluginDirection::In, Vector2::new(x, y))
     }
-    pub fn value_out() -> Self {
-        Self::new(PluginKind::Value, PluginDirection::Out)
+    pub fn value_out(x: f32, y: f32) -> Self {
+        Self::new(PluginKind::Value, PluginDirection::Out, Vector2::new(x, y))
     }
-    pub fn value_inout() -> Self {
-        Self::new(PluginKind::Value, PluginDirection::InOut)
+    pub fn value_inout(x: f32, y: f32) -> Self {
+        Self::new(PluginKind::Value, PluginDirection::InOut, Vector2::new(x, y))
     }
 
     pub fn is_input(&self) -> bool {
@@ -110,5 +118,6 @@ impl Plugin {
             }
         };
         d.draw_circle_v(center, self.radius(), color);
+        d.draw_circle_v(center, self.radius() - self.kind.thickness(), Color::BLACK);
     }
 }

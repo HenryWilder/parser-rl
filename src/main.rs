@@ -34,8 +34,9 @@ fn main() {
     let mut rack = Rack::new(Pane::new(Rectangle::new(0.0, 0.0, window_width, window_height)));
 
     rack.insert_device(0, DeviceKind::Label(String::from("Test")));
-    rack.insert_device(1, DeviceKind::Immediate(Value::Int(0)));
-    rack.insert_device(2, DeviceKind::Immediate(Value::Int(0)));
+    rack.insert_device(1, DeviceKind::Immediate(Value::I32(-363)));
+    rack.insert_device(2, DeviceKind::Immediate(Value::U32(654)));
+    rack.insert_device(3, DeviceKind::Immediate(Value::F32(5.63)));
 
     while !rl.window_should_close() {
         // Update

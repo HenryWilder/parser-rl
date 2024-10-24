@@ -9,7 +9,8 @@ pub struct Rack {
 }
 
 impl Rack {
-    pub const DEVICE_GAP: f32 = 20.0;
+    pub const DEVICE_GAP: f32 = 1.0;
+    pub const RACK_WIDTH: f32 = 20.0;
 
     pub fn new(pane: Pane) -> Self {
         Self {
@@ -25,7 +26,7 @@ impl Rack {
                 let rec = device.rectangle();
                 rec.y + rec.height + Self::DEVICE_GAP
             });
-        let device = Device::new(Vector2::new(20.0, y), kind);
+        let device = Device::new(Vector2::new(Self::RACK_WIDTH, y), kind);
         for device in self.devices.iter_mut().skip(index) {
             device.move_y(device.rectangle().height + Self::DEVICE_GAP);
         }
