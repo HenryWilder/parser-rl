@@ -1,39 +1,40 @@
 use raylib::prelude::*;
 
-use crate::Device;
+use crate::{Device, DeviceKind, Pane};
 
 #[derive(Debug)]
 pub struct Rack {
-    pub rec: Rectangle,
+    pub pane: Pane,
     pub devices: Vec<Device>,
 }
 
 impl Rack {
-    pub fn new(rec: Rectangle) -> Self {
+    pub const DEVICE_GAP: f32 = 20.0;
+
+    pub fn new(pane: Pane) -> Self {
         Self {
-            rec,
+            pane,
             devices: Vec::new()
         }
     }
 
-    fn device_rec_iter(&self) -> impl Iterator<Item = (Rectangle, &Device)> {
-        let x = self.rec.x;
-        let mut y = self.rec.y;
-        self.devices.iter()
-            .map(move |device| {
-                let dim = device.measure();
-                let item = (Rectangle::new(x, y, dim.x, dim.y), device);
-                y += dim.y;
-                item
-            })
+    pub fn insert_device(&mut self, index: usize, kind: DeviceKind) {
+        let y = index.checked_sub(1)
+            .and_then(|i| self.devices.get(i))
+            .map_or(20.0, |device| {
+                let rec = device.rectangle();
+                rec.y + rec.height + Self::DEVICE_GAP
+            });
+        let device = Device::new(Vector2::new(20.0, y), kind);
+        for device in self.devices.iter_mut().skip(index) {
+            device.move_y(device.rectangle().height + Self::DEVICE_GAP);
+        }
+        self.devices.insert(index, device);
     }
 
     pub fn draw(&self, d: &mut impl RaylibDraw) {
-        let Rectangle { x, y, width, height } = self.rec;
-        let mut d = d.begin_scissor_mode(x as i32, y as i32, width as i32, height as i32);
-        d.clear_background(Color::BLACK);
-        for (rec, device) in self.device_rec_iter() {
-            device.draw(&mut d, Vector2::new(rec.x, rec.y));
+        for device in self.devices.iter() {
+            device.draw(d);
         }
     }
 }
