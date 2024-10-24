@@ -26,6 +26,7 @@ fn main() {
     let (mut rl, thread) = raylib::init()
         .size(window_width as i32, window_height as i32)
         .title("Parser toy")
+        .msaa_4x()
         .build();
 
     rl.set_target_fps(60);

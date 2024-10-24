@@ -37,7 +37,7 @@ impl PluginKind {
 
     pub fn thickness(&self) -> f32 {
         match self {
-            PluginKind::Execution => 3.0,
+            PluginKind::Execution => 3.5,
             PluginKind::Value     => 1.5,
         }
     }
@@ -117,7 +117,11 @@ impl Plugin {
                 PluginDirection::InOut => Color::VIOLET,
             }
         };
-        d.draw_circle_v(center, self.radius(), color);
-        d.draw_circle_v(center, self.radius() - self.kind.thickness(), Color::BLACK);
+        let radius = self.radius();
+        let thick = self.kind.thickness();
+        d.draw_circle_v(center + Vector2::new(0.0, thick * 0.25), radius + thick * 0.5, Color::new(0, 0, 0, 40));
+        d.draw_circle_v(center, radius, color);
+        d.draw_circle_v(center + Vector2::new(0.0, thick * 0.25), radius - thick * 0.5, Color::new(0, 0, 0, 40));
+        d.draw_circle_v(center, radius - thick, Color::BLACK);
     }
 }

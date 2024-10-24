@@ -69,6 +69,7 @@ impl Device {
     pub const PLUGIN_INSET: f32 = Self::PLUGIN_GAP + Self::PLUGIN_SHARED_RADIUS;
     pub const LABEL_FONT_SIZE: i32 = 20;
     pub const WIDTH: f32 = 200.0;
+    pub const GRIP_WIDTH: f32 = 10.0;
 
     pub fn new(position: Vector2, kind: DeviceKind) -> Self {
         let (height, plugins) = match &kind {
@@ -162,17 +163,20 @@ impl Device {
     }
 
     pub fn draw(&self, d: &mut impl RaylibDraw) {
-        d.draw_rectangle_rec(self.rec, Color::new(50, 50, 60, 255));
+        let Rectangle { x, y, width, height } = self.rec;
+        let mut d = d.begin_scissor_mode(x as i32, y as i32, width as i32, height as i32);
+        d.draw_rectangle_rec(self.rec, Color::new(90, 90, 110, 255));
+        d.draw_rectangle_rec(Rectangle::new(x + Self::GRIP_WIDTH, y, width - Self::GRIP_WIDTH * 2.0, height), Color::new(50, 50, 60, 255));
 
         for plugin in self.plugins.iter() {
-            plugin.draw(d, self.position() + plugin.offset);
+            plugin.draw(&mut d, self.position() + plugin.offset);
         }
 
         match &self.kind {
             DeviceKind::Label(text) => {
                 d.draw_text(
                     text.as_str(),
-                    (self.rec.x + Self::PLUGIN_INSET * 2.0) as i32,
+                    (self.rec.x + Self::GRIP_WIDTH + Self::PLUGIN_INSET * 2.0) as i32,
                     (self.rec.y + Self::PLUGIN_GAP) as i32,
                     Self::LABEL_FONT_SIZE,
                     Color::WHITE,
@@ -181,7 +185,7 @@ impl Device {
             DeviceKind::Immediate(value) => {
                 d.draw_text(
                     value.to_string().as_str(),
-                    (self.rec.x + Self::PLUGIN_GAP) as i32,
+                    (self.rec.x + Self::GRIP_WIDTH + Self::PLUGIN_GAP) as i32,
                     (self.rec.y + Self::PLUGIN_GAP) as i32,
                     Self::LABEL_FONT_SIZE,
                     Color::WHITE,
